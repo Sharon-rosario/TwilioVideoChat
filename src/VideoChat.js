@@ -17,34 +17,35 @@ const VideoChat = () => {
     setRoomName(event.target.value);
   }, []);
 
-  const handleSubmit = useCallback(
-    async (event) => {
-      event.preventDefault();
-      setConnecting(true);
-      const data = await fetch("/video/token", {
-        method: "POST",
-        body: JSON.stringify({
-          identity: username,
-          room: roomName,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then((res) => res.json());
-      Video.connect(data.token, {
-        name: roomName,
+// VideoChat.js (inside handleSubmit)
+const handleSubmit = useCallback(
+  async (event) => {
+    event.preventDefault();
+    setConnecting(true);
+    const data = await fetch("/api/video-token", { // Changed from /video/token
+      method: "POST",
+      body: JSON.stringify({
+        identity: username,
+        room: roomName,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((res) => res.json());
+    Video.connect(data.token, {
+      name: roomName,
+    })
+      .then((room) => {
+        setConnecting(false);
+        setRoom(room);
       })
-        .then((room) => {
-          setConnecting(false);
-          setRoom(room);
-        })
-        .catch((err) => {
-          console.error(err);
-          setConnecting(false);
-        });
-    },
-    [roomName, username]
-  );
+      .catch((err) => {
+        console.error(err);
+        setConnecting(false);
+      });
+  },
+  [roomName, username]
+);
 
   const handleLogout = useCallback(() => {
     setRoom((prevRoom) => {
